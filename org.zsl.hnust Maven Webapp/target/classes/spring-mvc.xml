@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+    		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	    	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+	    	http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <!-- 自动扫描且只扫描@Controller -->
+    <context:component-scan base-package="com.cn.hnust.controller" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+    </context:component-scan>
+
+    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
+        <mvc:message-converters register-defaults="true">
+            <!-- 将StringHttpMessageConverter的默认编码设为UTF-8 -->
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <constructor-arg value="UTF-8" />
+            </bean>
+            <!-- 将JacksonHttpMessageConverter的默认格式化输出设为true -->
+            <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+                <property name="prettyPrint" value="true"/>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <!-- REST中根据URL后缀自动判定Content-Type及相应的View -->
+    <bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+        <property name="mediaTypes" >
+            <value>
+                json=application/json
+                xml=application/xml
+            </value>
+        </property>
+    </bean>
+
+<!--    <mvc:interceptors>
+        <bean class="com.ecp.security.authenticate.AuthenticateInterceptor">
+            <constructor-arg name="excludes">
+                <array value-type="java.lang.String">
+                    <value>/mock/login</value>
+                    <value>/webservice/*</value>
+                    <value>/api/demo</value>
+                    <value>/demo</value>
+                    <value>/android</value>
+                    <value>/api/activitiBusiness</value>
+                    <value>/api/v1/attachment</value>
+                </array>
+            </constructor-arg>
+        </bean>
+    </mvc:interceptors>-->
+
+    <!-- 定义JSP文件的位置 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!-- 容器默认的DefaultServletHandler处理 所有静态内容与无RequestMapping处理的URL-->
+    <mvc:default-servlet-handler/>
+
+    <!-- 定义无需Controller的url<->view直接映射 -->
+    <mvc:view-controller path="/" view-name="index"/>
+
+    <!-- 定义文件上传 -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+
+    <!-- task任务扫描注解 -->
+<!--     <task:annotation-driven/> -->
+
+    <!-- 此处对于定时时间的配置会被注解中的时间配置覆盖，因此，以注解配置为准 -->
+    <!--<task:scheduled-tasks scheduler="myScheduler">
+        <task:scheduled ref="scheduledTaskManager" method="webMagicTask" cron="0 0 0/1 * * ? "/>
+    </task:scheduled-tasks>
+    <task:scheduler id="myScheduler" pool-size="10"/>-->
+
+</beans>
